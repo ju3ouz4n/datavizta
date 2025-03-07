@@ -3,28 +3,18 @@
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
     import {onMount} from "svelte";
-    import {get} from "$lib/api";
+    import {get, getitems, getAllInstances} from "$lib/api";
 
     /*Bound var*/
     export let cloudConfig: Cloud
 
     let cloud_providers_route = "cloud/instance/all_providers";
-    let cloud_instances_route = "cloud/instance/all_instances"
 
-    let locaitems = []
+
     let cloud_providers = []
     let cloud_instances = []
 
-    function getitems(route) {
-        return get(route).then((response) => response.json())
-            .then((data) => {
-                let elements = [];
-                for(let i = 0; i < data.length; i++) {
-                    elements.push({value: data[i], label: data[i]});
-                }
-                return elements
-            });
-    }
+
 
     function getfirstitem(route) {
         return get(route).then((response) => response.json())
@@ -34,19 +24,20 @@
     }
 
     onMount(async () => { 
+
         cloud_providers = await getitems(cloud_providers_route);
-        cloud_instances = await getAllInstances("aws");
-        cloudConfig.provider = "aws";
-        cloudConfig.instance_type = await getfirstitem(cloud_instances_route+"?provider="+cloudConfig.provider);
+        cloud_instances = await getAllInstances(cloudConfig.provider)
+
     })
 
     async function provider_select(event){
+        cloud_instances = await getAllInstances(event.detail.value)
         cloudConfig = {
-            "instance_type": await getfirstitem(cloud_instances_route+"?provider="+event.detail.value),
+            "instance_type": cloud_instances[0].value,
             "provider":event.detail.value,
             "usage":cloudConfig.usage
         }
-        cloud_instances = await getAllInstances(event.detail.value)
+
         
     }
 
@@ -54,16 +45,7 @@
         cloudConfig.instance_type = event.detail.value
     }
 
-    function getAllInstances(cloud_provider) {
-        return get(cloud_instances_route+"?provider="+cloud_provider).then((response) => response.json())
-            .then((data) => {
-                let elements = [];
-                for(let i = 0; i < data.length; i++) {
-                    elements.push({value: data[i], label: data[i]});
-                }
-                return elements
-            });
-    }
+
    
 </script>
 

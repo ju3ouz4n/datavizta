@@ -34,9 +34,6 @@
         architems = await getitems(families_route);
         rammanufitems = await getitems(ram_manuf_route);
         ssdmanufitems = await getitems(ssd_manuf_route);
-        serverConfig.config.cpu.family = "skylake";
-        serverConfig.config.ram[0].manufacturer = "Samsung";
-        serverConfig.config.disk[0].manufacturer = "Micron";
     })
 
     function archi_select(event){

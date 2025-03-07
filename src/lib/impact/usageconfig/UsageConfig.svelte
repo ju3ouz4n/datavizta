@@ -2,7 +2,7 @@
     import type {Usage, UsageRequest} from "$lib/types/hardware";
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
-    import {onMount} from "svelte";
+    import {onMount,createEventDispatcher} from "svelte";
     import {get} from "$lib/api";
 
     /*Bound var*/
@@ -14,10 +14,8 @@
     let locaitems = []
     let selectedRegionLabel = "World"
 
+
     onMount(async () => { 
-        locaitems = await getlocalisation(localisation_route);
-        usage.use_time_ratio = usageConfig.use_time_ratio.hours_per_day / 24
-        usage.avg_power = null
         usageConfig.extendLifetime.value= 0
         usageConfig.time_workload = [ {
             time_percentage : 30,
@@ -31,6 +29,7 @@
             time_percentage : 40,
             load_percentage : 10
         }]
+       locaitems = await getlocalisation(localisation_route);
     })
 
     function getlocalisation(route) {

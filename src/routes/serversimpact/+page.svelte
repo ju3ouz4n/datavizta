@@ -1,8 +1,8 @@
 <script lang="ts">
     import type {VerboseServerImpacts} from "$lib/types/impact";
-    import ResultGrid from "$lib/impact/server-cloud/ResultGrid.svelte";
     import ServerConfig from "$lib/impact/server-cloud/ServerConfig.svelte";
     import type { Server, Usage } from "$lib/types/hardware";
+    import ResultGrid from "$lib/impact/server-cloud/ResultGrid.svelte";
     import UsageConfig from "$lib/impact/usageconfig/UsageConfig.svelte";
     import type { Impacts } from "$lib/types/impact";
     import { _ } from "svelte-i18n";
@@ -53,7 +53,7 @@
             cpu: {
                 units: 2,
                 core_units: 16,
-                tdp: 150
+                tdp: 150,
             },
             ram: [
                 {
@@ -85,6 +85,11 @@
         } 
     };
     
+    //Default values
+    server.config.cpu.family = "skylake";
+    server.config.ram[0].manufacturer = "Samsung";
+    server.config.disk[0].manufacturer= "Micron";
+
     let serverImpact: Impacts;
     let verboseImpacts:VerboseServerImpacts = {
         "adp": {
@@ -134,10 +139,10 @@
         },
     };
 
-    $: server, updateImpact();
 
-    async function updateImpact() {
-        serverImpact = await getServerImpact(server);
+    $: updateImpact(server);
+    async function updateImpact(srv) {
+        serverImpact = await getServerImpact(srv);
         verboseImpacts.adp.embedded.cpu = serverImpact['verbose']['CPU-1']['impacts']['adp']['embedded']['value']
         verboseImpacts.adp.embedded.ram = serverImpact['verbose']['RAM-1']['impacts']['adp']['embedded']['value']
         verboseImpacts.adp.embedded.motherboard = serverImpact['verbose']['MOTHERBOARD-1']['impacts']['adp']['embedded']['value']

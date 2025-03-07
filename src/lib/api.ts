@@ -60,3 +60,59 @@ export async function getUserDeviceImpact(device: UserDevice, yearly: Boolean = 
     return JSON.parse(json);
   });
 }
+
+
+ export async function getitems(route) {
+   return get(route)
+     .then((response) => response.json())
+     .then((data) => {
+       let elements = [];
+       for (let i = 0; i < data.length; i++) {
+         elements.push({ value: data[i], label: data[i] });
+       }
+       return elements;
+     });
+ }
+
+    export async function getAllInstances(cloud_provider) {
+      let cloud_instances_route = "cloud/instance/all_instances";
+      return get(cloud_instances_route + "?provider=" + cloud_provider)
+        .then((response) => response.json())
+        .then((data) => {
+          let elements = [];
+          for (let i = 0; i < data.length; i++) {
+            elements.push({ value: data[i], label: data[i] });
+          }
+          return elements;
+        });
+    }
+
+export function getExtendLifetimeAvoid(
+  lifetime: Number,
+  extendlifetime: Number,
+  impact: Impacts,
+  yearly
+) {
+  let output = {};
+  if (extendlifetime == 0) {
+    Object.keys(impact.impacts).forEach(function (key) {
+      output[key] = { value: 0, unit: impact.impacts[key].unit };
+    });
+  } else {
+    Object.keys(impact.impacts).forEach(function (key) {
+      let embedded = impact.impacts[key].embedded.value;
+      if (yearly == true) {
+        embedded = lifetime * embedded;
+      }
+      let avoided = (embedded * extendlifetime) / lifetime;
+      if (yearly == true) {
+        avoided = avoided / extendlifetime;
+      }
+      output[key] = {
+        value: avoided,
+        unit: impact.impacts[key].unit,
+      };
+    });
+  }
+  return output;
+}

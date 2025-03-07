@@ -2,35 +2,20 @@
     import type { Usage, UserDevice} from "$lib/types/hardware";
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
-    import {onMount} from "svelte";
-    import {get} from "$lib/api";
+    import {onMount,createEventDispatcher} from "svelte";
 
+    import {get} from "$lib/api";
     /*Bound var*/
     export let userDeviceConfig: UserDevice
     export let usageConfig: Usage
 
     let device_types = []
     let archetypes = []
-    let items = [{value:'terminal', label:$_('terminal-config.terminals')},{value:'peripheral', label:$_('terminal-config.peripherals')}]
     let category = {value:"terminal", label:$_('terminal-config.terminals')}
 
-    function getitems(route) {
-        return get(route).then((response) => response.json())
-            .then((data) => {
-                let elements = [];
-                for(let i = 0; i < data.length; i++) {
-                    elements.push({value: data[i], label: data[i]});
-                }
-                return elements
-            });
-    }
-
-    function getfirstitem(route) {
-        return get(route).then((response) => response.json())
-            .then((data) => {
-                return data[0]
-            });
-    }
+	const dispatch = createEventDispatcher();
+    $: category_items = [{value:'terminal', label:$_('terminal-config.terminals')},{value:'peripheral', label:$_('terminal-config.peripherals')}]
+   
 
     async function updateDefaultUsageValues(category, subcategory, archetype) {
         let temp = await getUsageDefaultValues(category, subcategory, archetype)
@@ -62,7 +47,8 @@
         userDeviceConfig.subcategory = device_types[0]
         archetypes = await getArchetypes(userDeviceConfig.category, userDeviceConfig.subcategory);
         userDeviceConfig.archetype = archetypes[0].value
-        updateDefaultUsageValues(userDeviceConfig.category, userDeviceConfig.subcategory, userDeviceConfig.archetype)
+        await updateDefaultUsageValues(userDeviceConfig.category, userDeviceConfig.subcategory, userDeviceConfig.archetype)
+        dispatch("terminalConfigComponentInit",{userDeviceConfig,usageConfig})
     })
 
     async function category_select(event){
@@ -78,18 +64,19 @@
         //userDeviceConfig.archetype = archetypes[0].value
         const use = userDeviceConfig.usage
         userDeviceConfig = { category: cat, subcategory: subcat, archetype: arch, usage: use }
-        updateDefaultUsageValues(cat, subcat, arch)
+        // updateDefaultUsageValues(cat, subcat, arch)
     }
 
     async function device_type_select(event) {
         userDeviceConfig.subcategory = event.detail.value
         archetypes = await getArchetypes(userDeviceConfig.category, userDeviceConfig.subcategory)
         userDeviceConfig.archetype = archetypes[0].value
-        updateDefaultUsageValues(userDeviceConfig.category, userDeviceConfig.subcategory, userDeviceConfig.archetype)
     }
 
-    function archetype_select(event){
+    async function archetype_select(event){
         userDeviceConfig.archetype = event.detail.value
+        await updateDefaultUsageValues(userDeviceConfig.category, userDeviceConfig.subcategory, userDeviceConfig.archetype)
+        dispatch("terminalConfigComponentUpdated",{userDeviceConfig,usageConfig})
     }
 
     function getArchetypes(category, subcategory) {
@@ -109,14 +96,13 @@
     function getDeviceTypes(category) {
         return get(category+"/all").then((response) => response.json())
     }
-   $: usageConfig
 
 </script>
 
   <div class="relative min-w-[100px] w-full mb-2 group">
         <label class="block text-sm font-medium text-gray-900">{$_('terminal-config.category')}</label>
         <div style="--borderRadius: 0.5em;">
-            <Select items={items} on:select={category_select} value={category.label}/>
+            <Select items={category_items} on:select={category_select} value={category.label}/>
         </div>
     </div>
     <div class="relative min-w-[100px] w-full mb-2 group">

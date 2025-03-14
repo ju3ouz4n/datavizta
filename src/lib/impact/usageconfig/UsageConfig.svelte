@@ -146,7 +146,7 @@
                     {#if (usageType != "Terminal")}
                     <label class="block text-sm font-medium text-gray-900">{$_('usage-config.method')}</label>
                      <div style="--borderRadius: 0.5em;">
-                        <Select items={[{value: 'Electricity', label: $_('usage-methods.elec')},{value: 'Load', label: $_('usage-methods.load')},{value: 'ExtLoad', label: $_('usage-methods.extload')}]} on:select={change_method} value="{$_('usage-methods.elec')}"/>
+                        <Select items={[{value: 'Electricity', label: $_('usage-methods.elec')},{value: 'Load', label: $_('usage-methods.load')},{value: 'ExtLoad', label: $_('usage-methods.extload')}]} on:select={change_method} value="{{value: 'Electricity', label: $_('usage-methods.elec')}}"/>
                     </div>
                     {:else}
                     <label class="block text-sm font-medium text-gray-900">{$_('usage-config.hoursperday')}</label>
@@ -157,7 +157,7 @@
                 {:else}
                 <label class="block text-sm font-medium text-gray-900">{$_('usage-config.method')}</label>
                 <div style="--borderRadius: 0.5em;">
-                    <Select items={[{value: 'Load', label: $_('usage-methods.load')},{value: 'ExtLoad', label: $_('usage-methods.extload')}]} on:select={change_method} value="{$_('usage-methods.load')}"/>
+                    <Select items={[{value: 'Load', label: $_('usage-methods.load')},{value: 'ExtLoad', label: $_('usage-methods.extload')}]} on:select={change_method} value="{{value: 'Load', label: $_('usage-methods.load')}}"/>
                 </div>
                 {/if}
         </div>

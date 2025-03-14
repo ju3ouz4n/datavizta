@@ -3,7 +3,7 @@
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
     import {onMount} from "svelte";
-    import {get, getitems, getAllInstances} from "$lib/api";
+    import {getitems, getAllInstances} from "$lib/api";
 
     /*Bound var*/
     export let cloudConfig: Cloud
@@ -16,12 +16,6 @@
 
 
 
-    function getfirstitem(route) {
-        return get(route).then((response) => response.json())
-            .then((data) => {
-                return data[0]
-            });
-    }
 
     onMount(async () => { 
 

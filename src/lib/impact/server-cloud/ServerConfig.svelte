@@ -3,7 +3,7 @@
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
     import {onMount} from "svelte";
-    import {get} from "$lib/api";
+    import {getitems} from "$lib/api";
     import * as Utils from "$lib/utils"
 
     /*Bound var*/
@@ -19,16 +19,6 @@
     let ssdmanufitems = [];
     let casetypes = [{value: 'rack', label: 'Rack'},{value: 'blade', label: 'Blade'}]
 
-    function getitems(route) {
-        return get(route).then((response) => response.json())
-            .then((data) => {
-                let elements = [];
-                for(let i = 0; i < data.length; i++) {
-                    elements.push({value: data[i], label: data[i]});
-                }
-                return elements
-            });
-    }
 
     onMount(async () => { 
         architems = await getitems(families_route);

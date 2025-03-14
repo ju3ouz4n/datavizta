@@ -4,7 +4,7 @@
     import Select from "svelte-select"
     import {onMount,createEventDispatcher} from "svelte";
 
-    import {get} from "$lib/api";
+    import {getUsageDefaultValues,getArchetypes,getDeviceTypes} from "$lib/api";
     /*Bound var*/
     export let userDeviceConfig: UserDevice
     export let usageConfig: Usage
@@ -79,23 +79,7 @@
         dispatch("terminalConfigComponentUpdated",{userDeviceConfig,usageConfig})
     }
 
-    function getArchetypes(category, subcategory) {
-        return get(category + "/" + subcategory + "/archetypes").then((response) => response.json())
-            .then((data) => {
-                let elements = [];
-                for(let i = 0; i < data.length; i++) {
-                    elements.push({value: data[i], label: data[i]});
-                }
-                return elements
-            });
-    }
 
-    function getUsageDefaultValues(category, subcategory, archetype) {
-        return get(category + "/" + subcategory + "/archetype_config?archetype=" + archetype).then((response) => response.json())
-    }
-    function getDeviceTypes(category) {
-        return get(category+"/all").then((response) => response.json())
-    }
 
 </script>
 

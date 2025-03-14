@@ -3,7 +3,7 @@
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
     import {onMount,createEventDispatcher} from "svelte";
-    import {get} from "$lib/api";
+    import {getlocalisation} from "$lib/api";
 
     /*Bound var*/
     export let usage: UsageRequest
@@ -32,17 +32,7 @@
        locaitems = await getlocalisation(localisation_route);
     })
 
-    function getlocalisation(route) {
-        return get(route).then((response) => response.json())
-            .then((data) => {
-                let elements = [];
-                let items = Object.keys(data)
-                for (let i = 0; i < items.length; i++) {
-                    elements.push({value: data[items[i]], label: items[i]});
-                }
-                return elements
-            });
-    }
+
 
     function change_method(event){
         if(event.detail.value == "Load"){

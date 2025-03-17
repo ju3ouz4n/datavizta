@@ -3,7 +3,7 @@
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
     import {onMount} from "svelte";
-    import {getitems, getAllInstances} from "$lib/api";
+    import boaviztaClient from "$lib/api";
 
     /*Bound var*/
     export let cloudConfig: Cloud
@@ -19,13 +19,13 @@
 
     onMount(async () => { 
 
-        cloud_providers = await getitems(cloud_providers_route);
-        cloud_instances = await getAllInstances(cloudConfig.provider)
+        cloud_providers = await boaviztaClient.getitems(cloud_providers_route);
+        cloud_instances = await boaviztaClient.getAllInstances(cloudConfig.provider)
 
     })
 
     async function provider_select(event){
-        cloud_instances = await getAllInstances(event.detail.value)
+        cloud_instances = await boaviztaClient.getAllInstances(event.detail.value)
         cloudConfig = {
             "instance_type": cloud_instances[0].value,
             "provider":event.detail.value,

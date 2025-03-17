@@ -2,8 +2,8 @@
     import type {Usage, UsageRequest} from "$lib/types/hardware";
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
-    import {onMount,createEventDispatcher} from "svelte";
-    import {getlocalisation} from "$lib/api";
+    import {onMount} from "svelte";
+    import boaviztaClient from "$lib/api";
 
     /*Bound var*/
     export let usage: UsageRequest
@@ -29,7 +29,7 @@
             time_percentage : 40,
             load_percentage : 10
         }]
-       locaitems = await getlocalisation(localisation_route);
+       locaitems = await boaviztaClient.getlocalisation(localisation_route);
     })
 
 

@@ -1,8 +1,59 @@
 
     import type { PageLoad } from './$types';
     import type { Cloud, Usage } from "$lib/types/hardware";
-    import { getCloudImpact, getitems, getAllInstances } from "$lib/api";
+    import type { VerboseServerImpacts } from "$lib/types/impact";
+
+    import boaviztaClient from "$lib/api";
     
+    let verboseImpacts: VerboseServerImpacts = {
+          adp: {
+            embedded: {
+              hdd: 0,
+              motherboard: 0,
+              power_supply: 0,
+              cpu: 0,
+              ram: 0,
+              ssd: 0,
+              case: 0,
+            },
+            use: {
+              total: 0,
+            },
+            unit: "kgSbeq",
+          },
+          pe: {
+            embedded: {
+              hdd: 0,
+              motherboard: 0,
+              power_supply: 0,
+              cpu: 0,
+              ram: 0,
+              ssd: 0,
+              case: 0,
+            },
+            use: {
+              total: 0,
+            },
+            unit: "MJ",
+          },
+          gwp: {
+            embedded: {
+              hdd: 0,
+              motherboard: 0,
+              power_supply: 0,
+              cpu: 0,
+              ram: 0,
+              ssd: 0,
+              case: 0,
+            },
+            use: {
+              total: 0,
+            },
+            unit: "kgCO2e",
+          },
+        };
+
+
     let usageConfig: Usage = {
         avg_power: {
             default: 150,
@@ -54,13 +105,24 @@
     };
 
 
-    export const load: PageLoad = async ({ params }) => {
-        let cloud_instances = await getAllInstances(cloud_instance.provider);
+
+    export const load: PageLoad = async ({ fetch, params }) => {
+  
+        boaviztaClient.setFetchMethod(fetch)
+        let cloud_instances = await boaviztaClient.getAllInstances(
+          cloud_instance.provider
+        );
         cloud_instance.instance_type = cloud_instances[0].value;
+        cloud_instance.provider = cloud_instance.provider;
+        verboseImpacts = await boaviztaClient.loadAndFormatCloudImpacts(
+          cloud_instance,
+          verboseImpacts
+        );
         return {
           config: {
             cloud_instance,
             usageConfig,
+            verboseImpacts
           },
         };
     };

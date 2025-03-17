@@ -3,8 +3,7 @@
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
     import {onMount,createEventDispatcher} from "svelte";
-
-    import {getUsageDefaultValues,getArchetypes,getDeviceTypes} from "$lib/api";
+    import boaviztaClient from "$lib/api";
     /*Bound var*/
     export let userDeviceConfig: UserDevice
     export let usageConfig: Usage
@@ -18,7 +17,7 @@
    
 
     async function updateDefaultUsageValues(category, subcategory, archetype) {
-        let temp = await getUsageDefaultValues(category, subcategory, archetype)
+        let temp = await boaviztaClient.getUsageDefaultValues(category, subcategory, archetype)
         usageConfig.avg_power.default = temp["USAGE"]["avg_power"]["default"]
         usageConfig.avg_power.value = temp["USAGE"]["avg_power"]["default"]
         usageConfig.avg_power.min = temp["USAGE"]["avg_power"]["min"]
@@ -43,9 +42,9 @@
 
     onMount(async () => { 
         userDeviceConfig.category = "terminal"
-        device_types = Object.keys(await getDeviceTypes(userDeviceConfig.category))
+        device_types = Object.keys(await boaviztaClient.getDeviceTypes(userDeviceConfig.category))
         userDeviceConfig.subcategory = device_types[0]
-        archetypes = await getArchetypes(userDeviceConfig.category, userDeviceConfig.subcategory);
+        archetypes = await boaviztaClient.getArchetypes(userDeviceConfig.category, userDeviceConfig.subcategory);
         userDeviceConfig.archetype = archetypes[0].value
         await updateDefaultUsageValues(userDeviceConfig.category, userDeviceConfig.subcategory, userDeviceConfig.archetype)
         dispatch("terminalConfigComponentInit",{userDeviceConfig,usageConfig})
@@ -56,10 +55,10 @@
         category.value=event.detail.value
         category.label=event.detail.label
         const cat=event.detail.value
-        device_types = Object.keys(await getDeviceTypes(cat))
+        device_types = Object.keys(await boaviztaClient.getDeviceTypes(cat))
         const subcat = device_types[0]
         //userDeviceConfig.subcategory = device_types[0]
-        archetypes = await getArchetypes(cat, subcat)
+        archetypes = await boaviztaClient.getArchetypes(cat, subcat)
         const arch = archetypes[0].value
         //userDeviceConfig.archetype = archetypes[0].value
         const use = userDeviceConfig.usage
@@ -69,7 +68,7 @@
 
     async function device_type_select(event) {
         userDeviceConfig.subcategory = event.detail.value
-        archetypes = await getArchetypes(userDeviceConfig.category, userDeviceConfig.subcategory)
+        archetypes = await boaviztaClient.getArchetypes(userDeviceConfig.category, userDeviceConfig.subcategory)
         userDeviceConfig.archetype = archetypes[0].value
     }
 

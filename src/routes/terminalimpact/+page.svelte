@@ -1,18 +1,15 @@
 <script lang="ts">
     import ResultGrid from "$lib/impact/terminal/ResultGrid.svelte";
     import UserDeviceConfig from "$lib/impact/terminal/TerminalConfig.svelte";
-    import type { Usage, UserDevice } from "$lib/types/hardware";
     import UsageConfig from "$lib/impact/usageconfig/UsageConfig.svelte";
     import { _ } from "svelte-i18n";
     import DetailedUsageConfig from "$lib/impact/usageconfig/DetailedUsageConfig.svelte"
     import * as Utils from "$lib/utils"
-    import type { Impacts } from "$lib/types/impact";
-    import { getUserDeviceImpact,getExtendLifetimeAvoid} from "$lib/api";
-    
+    import boaviztaClient from "$lib/api";
     /** @type {{ data: import('./$types').PageData }} */
     export let data;
-    export let impacts:Impacts;
-	export let { userDevice,usageConfig,yearly } = data;
+
+	export let { impacts,userDevice,usageConfig,yearly } = data;
     
 function updateFromChildComponents(params){
      userDevice = params.detail.userDeviceConfig;
@@ -20,10 +17,10 @@ function updateFromChildComponents(params){
 }
 
 async function updateImpact(dev,config,y) {
-    let updatedImpacts =  await getUserDeviceImpact(dev, y);
-    updatedImpacts.avoided = getExtendLifetimeAvoid(config.years_life_time.value,config.extendLifetime.value,updatedImpacts,y)
+    let updatedImpacts =  await boaviztaClient.getUserDeviceImpact(dev, y);
+    updatedImpacts.avoided = boaviztaClient.getExtendLifetimeAvoid(config.years_life_time.value,config.extendLifetime.value,updatedImpacts,y)
     return updatedImpacts;
-    }
+}
 
     $: impacts = updateImpact(userDevice,usageConfig,yearly);
 </script>

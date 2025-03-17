@@ -1,6 +1,6 @@
 
     import type { PageLoad } from './$types';
-    import { getUserDeviceImpact, getExtendLifetimeAvoid } from "$lib/api";
+    import boaviztaClient from "$lib/api";
     import type { Usage, UserDevice } from "$lib/types/hardware";
     import type { Impacts } from "$lib/types/impact";
     
@@ -46,7 +46,9 @@
     let yearly: boolean = false;
 
 
-    export const load: PageLoad = async ({ params }) => {
+    export const load: PageLoad = async ({ fetch, params }) => {
+      boaviztaClient.setFetchMethod(fetch)
+      impacts = await boaviztaClient.getUserDeviceImpact(userDevice, yearly);
       return {
         usageConfig,
         userDevice,

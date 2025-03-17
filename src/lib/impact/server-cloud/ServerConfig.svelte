@@ -3,27 +3,21 @@
     import { _ } from "svelte-i18n";
     import Select from "svelte-select"
     import {onMount} from "svelte";
-    import {getitems} from "$lib/api";
     import * as Utils from "$lib/utils"
 
     /*Bound var*/
     export let serverConfig: Server
     export let usageConfig: Usage
 
-    let families_route = "utils/cpu_family";
-    let ssd_manuf_route = "utils/ssd_manufacturer";
-    let ram_manuf_route = "utils/ram_manufacturer";
 
-    let architems = [];
-    let rammanufitems = [];
-    let ssdmanufitems = [];
+    export let architems = [];
+    export let rammanufitems = [];
+    export  let ssdmanufitems = [];
     let casetypes = [{value: 'rack', label: 'Rack'},{value: 'blade', label: 'Blade'}]
 
 
     onMount(async () => { 
-        architems = await getitems(families_route);
-        rammanufitems = await getitems(ram_manuf_route);
-        ssdmanufitems = await getitems(ssd_manuf_route);
+
     })
 
     function archi_select(event){

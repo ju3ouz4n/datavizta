@@ -1,110 +1,25 @@
 <script lang="ts">
-    import type {VerboseServerImpacts} from "$lib/types/impact";
     import ResultGrid from "$lib/impact/server-cloud/ResultGrid.svelte";
     import CloudConfig from "$lib/impact/server-cloud/CloudConfig.svelte";
     import UsageConfig from "$lib/impact/usageconfig/UsageConfig.svelte";
     import DetailedCloudConfig from "$lib/impact/server-cloud/DetailedCloudConfig.svelte"
     import DetailedUsageConfig from "$lib/impact/usageconfig/DetailedUsageConfig.svelte"
     import * as Utils from "$lib/utils"
-    import type { Cloud, Usage } from "$lib/types/hardware";
     import type { Impacts } from "$lib/types/impact";
     import { _ } from "svelte-i18n";
-    import { getCloudImpact } from "$lib/api";
-    
+    import boaviztaClient from "$lib/api";
     /** @type {{ data: import('./$types').PageData }} */
     export let data;
-	export let { cloud_instance,usageConfig } = data.config;
+	export let { cloud_instance,usageConfig,verboseImpacts } = data.config;
 
     let serverImpact: Impacts;
-    let verboseImpacts:VerboseServerImpacts = {
-        "adp": {
-            "embedded": {
-                "hdd": 0,
-                "motherboard":0,
-                "power_supply":0,
-                "cpu":0,
-                "ram":0,
-                "ssd":0,
-                "case":0
-           },
-           "use":  {
-               "total": 0
-           },
-           "unit": "kgSbeq"
-        },
-        "pe": {
-            "embedded": {
-                "hdd": 0,
-                "motherboard":0,
-                "power_supply":0,
-                "cpu":0,
-                "ram":0,
-                "ssd":0,
-                "case":0
-           },
-           "use":  {
-               "total": 0
-           },
-           "unit": "MJ"
-        },
-        "gwp": {
-            "embedded": {
-                "hdd": 0,
-                "motherboard":0,
-                "power_supply":0,
-                "cpu":0,
-                "ram":0,
-                "ssd":0,
-                "case":0
-           },
-           "use":  {
-               "total": 0
-           },
-           "unit": "kgCO2e"
-        },
-    };
-
-    $: cloud_instance, updateImpact();
+    $: updateImpact(cloud_instance);
     
-    async function updateImpact() {
-        serverImpact = await getCloudImpact(cloud_instance);
-
-verboseImpacts.adp.embedded.cpu = serverImpact['verbose']['CPU-1']['impacts']['adp']['embedded']['value']
-        verboseImpacts.adp.embedded.ram = serverImpact['verbose']['RAM-1']['impacts']['adp']['embedded']['value']
-        verboseImpacts.adp.embedded.motherboard = serverImpact['verbose']['MOTHERBOARD-1']['impacts']['adp']['embedded']['value']
-        verboseImpacts.adp.embedded.power_supply= serverImpact['verbose']['POWER_SUPPLY-1']['impacts']['adp']['embedded']['value']
-        verboseImpacts.adp.embedded.assembly= serverImpact['verbose']['ASSEMBLY-1']['impacts']['adp']['embedded']['value']
-        verboseImpacts.adp.unit = serverImpact['impacts']['adp']['unit']
-        verboseImpacts.adp.embedded.case= serverImpact['verbose']['CASE-1']['impacts']['adp']['embedded']['value']
-        verboseImpacts.adp.use.total  = serverImpact['impacts']['adp']['use']['value']
-
-        verboseImpacts.gwp.embedded.cpu = serverImpact['verbose']['CPU-1']['impacts']['gwp']['embedded']['value']
-        verboseImpacts.gwp.embedded.ram = serverImpact['verbose']['RAM-1']['impacts']['gwp']['embedded']['value']
-        verboseImpacts.gwp.embedded.motherboard = serverImpact['verbose']['MOTHERBOARD-1']['impacts']['gwp']['embedded']['value']
-        verboseImpacts.gwp.embedded.power_supply= serverImpact['verbose']['POWER_SUPPLY-1']['impacts']['gwp']['embedded']['value']
-        verboseImpacts.gwp.embedded.assembly= serverImpact['verbose']['ASSEMBLY-1']['impacts']['gwp']['embedded']['value']
-        verboseImpacts.gwp.unit = serverImpact['impacts']['gwp']['unit']
-        verboseImpacts.gwp.embedded.case= serverImpact['verbose']['CASE-1']['impacts']['gwp']['embedded']['value']
-        verboseImpacts.gwp.use.total  = serverImpact['impacts']['gwp']['use']['value']
-
-        verboseImpacts.pe.embedded.cpu = serverImpact['verbose']['CPU-1']['impacts']['pe']['embedded']['value']
-        verboseImpacts.pe.embedded.ram = serverImpact['verbose']['RAM-1']['impacts']['pe']['embedded']['value']
-        verboseImpacts.pe.embedded.motherboard = serverImpact['verbose']['MOTHERBOARD-1']['impacts']['pe']['embedded']['value']
-        verboseImpacts.pe.embedded.power_supply= serverImpact['verbose']['POWER_SUPPLY-1']['impacts']['pe']['embedded']['value']
-        verboseImpacts.pe.embedded.assembly= serverImpact['verbose']['ASSEMBLY-1']['impacts']['pe']['embedded']['value']
-        verboseImpacts.pe.unit = serverImpact['impacts']['pe']['unit']
-        verboseImpacts.pe.embedded.case= serverImpact['verbose']['CASE-1']['impacts']['pe']['embedded']['value']
-        verboseImpacts.pe.use.total  = serverImpact['impacts']['pe']['use']['value']
-        if ( serverImpact['verbose']['SSD-1'] !== undefined ) {
-            verboseImpacts.adp.embedded.ssd = serverImpact['verbose']['SSD-1']['impacts']['adp']['embedded']['value']
-            verboseImpacts.gwp.embedded.ssd = serverImpact['verbose']['SSD-1']['impacts']['gwp']['embedded']['value']
-            verboseImpacts.pe.embedded.ssd = serverImpact['verbose']['SSD-1']['impacts']['pe']['embedded']['value']
-        }
-        if ( serverImpact['verbose']['HDD-1'] !== undefined ) {
-            verboseImpacts.adp.embedded.hdd = serverImpact['verbose']['HDD-1']['impacts']['adp']['embedded']['value']
-            verboseImpacts.gwp.embedded.hdd = serverImpact['verbose']['HDD-1']['impacts']['gwp']['embedded']['value']
-            verboseImpacts.pe.embedded.hdd = serverImpact['verbose']['HDD-1']['impacts']['pe']['embedded']['value']
-        }
+    async function updateImpact(cloud_instance) {
+        verboseImpacts = await boaviztaClient.loadAndFormatCloudImpacts(
+          cloud_instance,
+          verboseImpacts
+        );
     }
 </script>
 

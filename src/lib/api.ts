@@ -8,21 +8,27 @@ if (import.meta.env.VITE_PUBLIC_API_URL) {
   base = "https://api.boavizta.org/v1";
 }
 
-// async function send(method: string, path: string, data: unknown = undefined) {
-//   const opts: RequestInit = { method, headers: {} };
-//   opts.method = method;
-//   opts.headers = {
-//     "Content-Type": "application/json",
-//   };
-//   if (method != "GET") {
-//     opts.body = JSON.stringify(data);
-//   }
-//   const res = await fetch(`${base}/${path}`, opts);
-//   if (!res.ok) throw new Error(res["detail"]);
-//   return res;
-// }
+class boaviztaClient {
+  static #instance: boaviztaClient;
+  private fetchFromPage;
 
-async function send(
+  private constructor() { }
+
+  public static get instance(): boaviztaClient {
+      if (!boaviztaClient.#instance) {
+          boaviztaClient.#instance = new boaviztaClient();
+      }
+
+      return boaviztaClient.#instance;
+  }
+
+  public setFetchMethod(svKitFetch){
+    if(svKitFetch !== undefined){
+      this.fetchFromPage = svKitFetch
+    }
+  }
+
+  public async send(
   method: string,
   path: string,
   data: unknown = undefined
@@ -41,8 +47,8 @@ async function send(
   }
   let fetchMethod;
   /* use sveltkit fetch when possible*/
-  if( fetchFromPage )
-    fetchMethod = fetchFromPage
+  if( this.fetchFromPage )
+    fetchMethod = this.fetchFromPage
   else 
     fetchMethod = fetch 
 
@@ -53,41 +59,42 @@ async function send(
   return res;
 }
 
-export async function get(path: string) {
-  return send("GET", path);
+public async get(path: string) {
+  return this.send("GET", path);
 }
 
 
 
-export async function post(path: string, data) {
-  return send("POST", path, data);
+public async post(path: string, data) {
+  return this.send("POST", path, data);
 }
 
 
 
-export async function getServerImpact(server: Server): Promise<Impacts> {
+public async getServerImpact(server: Server): Promise<Impacts> {
   const params = "?verbose=true";
-  const res = await post("server/" + params, {
+  const res = await this.post("server/" + params, {
     model: server.model,
     configuration: server.config,
     usage: server.usage,
   });
+
   return res;
 }
 
-export async function getCloudImpact(instance: Cloud): Promise<Impacts> {
+public async getCloudImpact(instance: Cloud): Promise<Impacts> {
   const params = "?verbose=true&criteria=gwp&criteria=pe&criteria=adp";
-  const res = await post("cloud/instance" + params, instance);
+  const res = await this.post("cloud/instance" + params, instance);
   return res;
 }
 
-export async function getUserDeviceImpact(
+public async  getUserDeviceImpact(
   device: UserDevice,
   yearly: Boolean = false
 ): Promise<Impacts> {
   let res;
   if (yearly) {
-    res = await post(
+    res = await this.post(
       device.category +
         "/" +
         device.subcategory +
@@ -97,7 +104,7 @@ export async function getUserDeviceImpact(
       device
     );
   } else {
-    res = await post(
+    res = await this.post(
       device.category +
         "/" +
         device.subcategory +
@@ -110,8 +117,8 @@ export async function getUserDeviceImpact(
   return res;
 }
 
-export async function getitems(route) {
-  return get(route)
+public async  getitems(route) {
+  return this.get(route)
     .then((data) => {
       let elements = [];
       for (let i = 0; i < data.length; i++) {
@@ -121,9 +128,9 @@ export async function getitems(route) {
     });
 }
 
-export async function getAllInstances(cloud_provider) {
+public async  getAllInstances(cloud_provider) {
   let cloud_instances_route = "cloud/instance/all_instances";
-  return get(cloud_instances_route + "?provider=" + cloud_provider)
+  return this.get(cloud_instances_route + "?provider=" + cloud_provider)
     .then((data) => {
       let elements = [];
       for (let i = 0; i < data.length; i++) {
@@ -133,7 +140,7 @@ export async function getAllInstances(cloud_provider) {
     });
 }
 
-export function getExtendLifetimeAvoid(
+public getExtendLifetimeAvoid(
   lifetime: Number,
   extendlifetime: Number,
   impact: Impacts,
@@ -162,8 +169,8 @@ export function getExtendLifetimeAvoid(
   }
   return output;
 }
-    export function getlocalisation(route) {
-      return get(route).then((data) => {
+    public async getlocalisation(route) {
+      return this.get(route).then((data) => {
         let elements = [];
         let items = Object.keys(data);
         for (let i = 0; i < items.length; i++) {
@@ -173,8 +180,8 @@ export function getExtendLifetimeAvoid(
       });
     }
 
-    export function getArchetypes(category, subcategory) {
-      return get(category + "/" + subcategory + "/archetypes")
+    public async getArchetypes(category, subcategory) {
+      return this.get(category + "/" + subcategory + "/archetypes")
         .then((data) => {
           let elements = [];
           for (let i = 0; i < data.length; i++) {
@@ -184,8 +191,8 @@ export function getExtendLifetimeAvoid(
         });
     }
 
-    export function getUsageDefaultValues(category, subcategory, archetype) {
-      return get(
+    public async getUsageDefaultValues(category, subcategory, archetype) {
+      return this.get(
         category +
           "/" +
           subcategory +
@@ -193,6 +200,61 @@ export function getExtendLifetimeAvoid(
           archetype
       );
     }
-    export function getDeviceTypes(category) {
-      return get(category + "/all");
+    public async getDeviceTypes(category) {
+      return this.get(category + "/all");
     }
+
+public async loadAndFormatCloudImpacts(cloud_instance, verboseImpactsSkeleton) {
+
+    let serverImpact = await this.getCloudImpact(cloud_instance);
+    let computeImpacts = { ...verboseImpactsSkeleton };
+    computeImpacts = this.mapImpactsFromApi(computeImpacts,serverImpact)
+    return computeImpacts;
+  }
+    
+  public mapImpactsFromApi(locaDatas, apiDatas){
+    const assessedImpacts:Array<string> = ["adp","gwp","pe"]
+    const expectedComponentLabels = [
+      "cpu",
+      "ram",
+      "motherboard",
+      "power_supply",
+      "assembly",
+      "case",
+      "ssd",
+      "hdd"
+    ];
+    const apiComponentLabels = [
+      "CPU-1",
+      "RAM-1",
+      "MOTHERBOARD-1",
+      "POWER_SUPPLY-1",
+      "ASSEMBLY-1",
+      "CASE-1",
+      "SSD-1",
+      "HDD-1",
+    ];
+
+    assessedImpacts.forEach(function (itemImpact) {
+        locaDatas[itemImpact]["unit"] = apiDatas.impacts[itemImpact]["unit"];
+        locaDatas[itemImpact]["use"]["total"] =
+          apiDatas.impacts[itemImpact]["use"]["value"];
+        expectedComponentLabels.forEach(function (itemComp, indexComp){
+          //Maps property names, E.g CPU-1 => cpu ...
+            const apiComponentLabel = apiComponentLabels[indexComp]
+            if (apiDatas.verbose[apiComponentLabel] !== undefined){
+              locaDatas[itemImpact]["embedded"][itemComp] =
+                apiDatas.verbose[apiComponentLabel]["impacts"][itemImpact][
+                  "embedded"
+                ]["value"];
+            }
+        })
+    });
+    return locaDatas;
+  }
+
+}
+
+
+const singleton =  boaviztaClient.instance
+export default singleton
